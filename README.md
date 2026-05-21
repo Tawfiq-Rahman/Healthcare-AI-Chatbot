@@ -1,12 +1,10 @@
-==============================================
                     AI MEDICAL DIAGNOSIS CHATBOT
                          PROJECT DOCUMENTATION
-================================================================================
 
 
 
 1. PROJECT OVERVIEW
-================================================================================
+
 
 AI Medical Diagnosis Chatbot is an intelligent healthcare assistance system that 
 helps patients self-assess potential diseases based on their symptoms. Using 
@@ -32,7 +30,7 @@ TECHNOLOGY STACK:
 
 
 2. TEAM MEMBERS & RESPONSIBILITIES
-================================================================================
+
 
 MEMBER A - Project Lead & Documentation
 Role: Lead Documentation, Error Handling, Quality Assurance
@@ -49,7 +47,7 @@ Days 2-4: Data documentation, test framework, deployment guides
 
 
 3. PROJECT STRUCTURE
-================================================================================
+
 
 Ai_chatbot/
 ├── app.py                          # Flask application (Member A & B)
@@ -73,7 +71,8 @@ Ai_chatbot/
 
 
 4. DATA FLOW ARCHITECTURE
-================================================================================
+
+
 
 User Input (Web UI)
     |
@@ -107,7 +106,8 @@ User sees prediction + disease info + recommendations
 
 
 5. INSTALLATION & SETUP
-================================================================================
+
+
 
 PREREQUISITES:
 - Python 3.8 or higher
@@ -139,7 +139,8 @@ The chatbot will be ready to use.
 
 
 6. API DOCUMENTATION
-================================================================================
+
+
 
 ENDPOINT: POST /chat
 Purpose: Conduct multi-turn medical consultation
@@ -182,7 +183,7 @@ Step 7: Return prediction with disease information
 
 
 7. DATASETS
-================================================================================
+
 
 TRAINING DATA STRUCTURE:
 - Training.csv (4,920 samples)
@@ -205,7 +206,8 @@ MASTER DATA:
 
 
 8. CONFIGURATION
-================================================================================
+
+
 
 Edit these constants in app.py to customize behavior:
 
@@ -224,7 +226,8 @@ SYMPTOM_MATCH_THRESHOLD = 0.8
 
 
 9. MODEL DETAILS
-================================================================================
+
+
 
 ALGORITHM: K-Nearest Neighbors (KNN)
 - K Value: 5 neighbors
@@ -250,7 +253,8 @@ Classification:
 
 
 10. FILE DESCRIPTIONS
-================================================================================
+
+
 
 app.py - Flask Web Server
 - Main Flask application with REST API
@@ -297,7 +301,8 @@ test.py - Testing Script
 
 
 11. TESTING
-================================================================================
+
+
 
 RUN TESTS:
     python test.py
@@ -313,7 +318,8 @@ All tests should pass without errors.
 
 
 12. TROUBLESHOOTING
-================================================================================
+
+
 
 ISSUE: "Module not found" or "ImportError"
 SOLUTION: Run pip install -r requirements.txt
@@ -343,7 +349,7 @@ SOLUTION: Check firewall settings
 
 
 13. USAGE EXAMPLE
-================================================================================
+
 
 SAMPLE CONVERSATION:
 
@@ -379,7 +385,8 @@ Precautions:
 
 
 14. VERIFICATION CHECKLIST
-================================================================================
+
+
 
 CODE QUALITY:
 ☐ All Python files have docstrings
@@ -412,7 +419,7 @@ TEAM COLLABORATION:
 
 
 15. QUICK REFERENCE
-================================================================================
+
 
 START APPLICATION:
 python app.py
@@ -440,7 +447,7 @@ KEY MODEL PARAMETERS:
 
 
 17. PROJECT STATUS & NOTES
-================================================================================
+
 
 Project Version: 1.0
 Status: Documentation & Code Quality Focus
@@ -458,7 +465,7 @@ Next Steps :
 4. Plan Phase 2 improvements
 
 
-======================================================
+
+
                             END OF DOCUMENTATION
-================================================================================
 
