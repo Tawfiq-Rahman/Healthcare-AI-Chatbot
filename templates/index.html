@@ -1,11 +1,528 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Healthcare AI Chatbot</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HealthCare ChatBot</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f0f4f8;
+    --white: #ffffff;
+    --primary: #1a6b5a;
+    --primary-light: #e8f5f1;
+    --accent: #f4845f;
+    --text: #1c2b2a;
+    --text-light: #6b7f7e;
+    --border: #d6e4e1;
+    --severe: #e53e3e;
+    --moderate: #dd6b20;
+    --mild: #2f855a;
+    --bubble-user: #1a6b5a;
+    --bubble-bot: #ffffff;
+    --shadow: 0 4px 24px rgba(26,107,90,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  /* Header */
+  .header {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .header-icon {
+    width: 48px; height: 48px;
+    background: var(--primary);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: var(--shadow);
+  }
+  .header-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .header-text p {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+  .knn-badge {
+    margin-left: auto;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  /* Chat Container */
+  .chat-container {
+    width: 100%;
+    max-width: 700px;
+    background: var(--white);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 72vh;
+    min-height: 480px;
+  }
+
+  /* Messages */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Bubbles */
+  .bubble-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .bubble-wrap.user { flex-direction: row-reverse; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .avatar.bot { background: var(--primary-light); }
+  .avatar.user { background: var(--primary); color: white; }
+  .bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+  .bubble.bot {
+    background: var(--bubble-bot);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .bubble.user {
+    background: var(--bubble-user);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+  .bubble .tag {
+    display: inline-block;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: 5px;
+    margin-bottom: 4px;
+  }
+
+  /* Typing indicator */
+  .typing {
+    display: flex; gap: 4px; padding: 14px 16px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px; border-bottom-left-radius: 4px;
+    width: fit-content;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .typing span {
+    width: 7px; height: 7px;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%,60%,100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* Yes/No buttons */
+  .yesno-wrap {
+    display: flex; gap: 10px; margin-top: 4px;
+  }
+  .yesno-btn {
+    padding: 8px 28px;
+    border-radius: 20px;
+    border: 2px solid var(--primary);
+    font-size: 0.88rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .yesno-btn.yes { background: var(--primary); color: white; }
+  .yesno-btn.yes:hover { background: #155748; }
+  .yesno-btn.no  { background: white; color: var(--primary); }
+  .yesno-btn.no:hover  { background: var(--primary-light); }
+
+  /* Input area */
+  .input-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--white);
+  }
+  .input-area input {
+    flex: 1;
+    padding: 11px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border 0.2s;
+    background: var(--bg);
+  }
+  .input-area input:focus { border-color: var(--primary); background: white; }
+  .input-area input:disabled { opacity: 0.5; cursor: not-allowed; }
+  .send-btn {
+    width: 42px; height: 42px;
+    background: var(--primary);
+    border: none; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(26,107,90,0.3);
+  }
+  .send-btn:hover { background: #155748; transform: scale(1.05); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .send-btn svg { fill: white; width: 18px; height: 18px; }
+
+  /* Result Card */
+  .result-card {
+    background: linear-gradient(135deg, #f0faf7 0%, #fff 100%);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 6px;
+    width: 100%;
+    max-width: 600px;
+  }
+  .result-card .disease-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .result-card .confidence-bar-wrap {
+    margin: 8px 0 12px;
+  }
+  .confidence-label {
+    font-size: 0.78rem; color: var(--text-light);
+    margin-bottom: 4px; font-weight: 500;
+  }
+  .confidence-bar {
+    height: 8px; background: var(--border);
+    border-radius: 4px; overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%; background: var(--primary);
+    border-radius: 4px; transition: width 1s ease;
+  }
+  .result-section { margin-top: 12px; }
+  .result-section h4 {
+    font-size: 0.78rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-light); margin-bottom: 6px;
+  }
+  .result-section p { font-size: 0.88rem; color: var(--text); line-height: 1.5; }
+  .precaution-list { list-style: none; padding: 0; }
+  .precaution-list li {
+    font-size: 0.85rem; color: var(--text);
+    padding: 5px 0 5px 18px;
+    position: relative; border-bottom: 1px solid var(--border);
+  }
+  .precaution-list li:last-child { border-bottom: none; }
+  .precaution-list li::before {
+    content: "✓"; position: absolute; left: 0;
+    color: var(--primary); font-weight: 700;
+  }
+  .severity-badge {
+    display: inline-block;
+    padding: 5px 14px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600;
+    margin-top: 6px;
+  }
+  .severity-badge.severe   { background: #fff5f5; color: var(--severe); border: 1px solid #feb2b2; }
+  .severity-badge.moderate { background: #fffaf0; color: var(--moderate); border: 1px solid #fbd38d; }
+  .severity-badge.mild     { background: #f0fff4; color: var(--mild); border: 1px solid #9ae6b4; }
+  .quote-box {
+    margin-top: 14px; padding: 12px 14px;
+    background: var(--primary-light);
+    border-radius: 10px; border-left: 3px solid var(--primary);
+    font-size: 0.84rem; color: var(--primary); font-style: italic;
+  }
+  .restart-btn {
+    margin-top: 14px;
+    padding: 9px 22px;
+    background: var(--accent); color: white;
+    border: none; border-radius: 20px;
+    font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .restart-btn:hover { background: #e06b48; }
+
+  .symptom-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chip {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.75rem; font-weight: 500;
+    padding: 3px 10px; border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .info-row {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px;
+  }
+  .info-item { font-size: 0.82rem; color: var(--text-light); }
+  .info-item span { color: var(--text); font-weight: 500; }
+</style>
 </head>
 <body>
-    
+
+<div class="header">
+  <div class="header-icon">🏥</div>
+  <div class="header-text">
+    <h1>HealthCare ChatBot</h1>
+    <p>AI-powered symptom checker using KNN</p>
+  </div>
+  <div class="knn-badge" id="knnBadge">KNN Model</div>
+</div>
+
+<div class="chat-container">
+  <div class="messages" id="messages"></div>
+  <div class="input-area">
+    <input type="text" id="userInput" placeholder="Type your answer here..." autocomplete="off"/>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+let currentStep = "name";
+let isYesNo = false;
+
+window.onload = () => {
+  setTimeout(() => {
+    botMessage("👋 Welcome to HealthCare ChatBot! I'll help you identify possible conditions based on your symptoms.");
+    setTimeout(() => botMessage("What is your name?"), 700);
+  }, 400);
+  document.getElementById("userInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") sendMessage();
+  });
+};
+
+function botMessage(text, extra) {
+  const msgs = document.getElementById("messages");
+
+  // Typing indicator
+  const typingWrap = document.createElement("div");
+  typingWrap.className = "bubble-wrap";
+  typingWrap.innerHTML = `<div class="avatar bot">🤖</div><div class="typing"><span></span><span></span><span></span></div>`;
+  msgs.appendChild(typingWrap);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  setTimeout(() => {
+    msgs.removeChild(typingWrap);
+
+    const wrap = document.createElement("div");
+    wrap.className = "bubble-wrap";
+
+    if (extra && extra.result) {
+      wrap.innerHTML = `<div class="avatar bot">🤖</div><div class="bubble bot">${text}</div>`;
+      msgs.appendChild(wrap);
+      renderResult(extra);
+    } else {
+      wrap.innerHTML = `<div class="avatar bot">🤖</div><div class="bubble bot">${text}</div>`;
+      msgs.appendChild(wrap);
+
+      if (extra && extra.tag === "symptoms_detected") {
+        const chipWrap = document.createElement("div");
+        chipWrap.className = "bubble-wrap";
+        const chips = extra.symptoms.split(", ").map(s => `<div class="chip">${s}</div>`).join("");
+        chipWrap.innerHTML = `<div class="avatar bot" style="opacity:0"></div><div class="symptom-chips">${chips}</div>`;
+        msgs.appendChild(chipWrap);
+      }
+
+      if (extra && extra.is_yesno) {
+        const ynWrap = document.createElement("div");
+        ynWrap.className = "bubble-wrap";
+        ynWrap.innerHTML = `
+          <div class="avatar bot" style="opacity:0"></div>
+          <div class="yesno-wrap">
+            <button class="yesno-btn yes" onclick="sendYesNo('yes')">Yes</button>
+            <button class="yesno-btn no"  onclick="sendYesNo('no')">No</button>
+          </div>`;
+        msgs.appendChild(ynWrap);
+        setInputDisabled(true);
+        isYesNo = true;
+      }
+    }
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 800);
+}
+
+function userMessage(text) {
+  const msgs = document.getElementById("messages");
+  const wrap = document.createElement("div");
+  wrap.className = "bubble-wrap user";
+  wrap.innerHTML = `<div class="avatar user">👤</div><div class="bubble user">${text}</div>`;
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sendMessage() {
+  if (isYesNo) return;
+  const input = document.getElementById("userInput");
+  const val = input.value.trim();
+  if (!val) return;
+  input.value = "";
+  userMessage(val);
+  sendToServer(currentStep, val);
+}
+
+function sendYesNo(val) {
+  isYesNo = false;
+  setInputDisabled(false);
+  // Remove yesno buttons
+  const allYnWraps = document.querySelectorAll(".yesno-wrap");
+  allYnWraps.forEach(w => w.parentElement.remove());
+  userMessage(val.charAt(0).toUpperCase() + val.slice(1));
+  sendToServer("guided", val);
+}
+
+function sendToServer(step, value) {
+  setInputDisabled(true);
+  fetch("/chat", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({step, value})
+  })
+  .then(r => r.json())
+  .then(data => {
+    currentStep = data.next_step;
+    if (data.next_step === "done") {
+      botMessage(data.reply, data);
+      setInputDisabled(true);
+    } else {
+      botMessage(data.reply, data);
+      if (!data.is_yesno) setInputDisabled(false);
+    }
+    // Update KNN badge
+    if (data.knn_accuracy) {
+      document.getElementById("knnBadge").textContent = `KNN ${data.knn_accuracy}% acc`;
+    }
+  })
+  .catch(() => {
+    botMessage("Something went wrong. Please refresh the page.");
+    setInputDisabled(false);
+  });
+}
+
+function setInputDisabled(val) {
+  document.getElementById("userInput").disabled = val;
+  document.getElementById("sendBtn").disabled = val;
+}
+
+function renderResult(data) {
+  const msgs = document.getElementById("messages");
+  const wrap = document.createElement("div");
+  wrap.className = "bubble-wrap";
+
+  const precHtml = data.precautions.length
+    ? `<ul class="precaution-list">${data.precautions.map(p => `<li>${p}</li>`).join("")}</ul>`
+    : "<p>No specific precautions available.</p>";
+
+  const sympChips = data.symptoms.map(s => `<div class="chip">${s}</div>`).join("");
+
+  wrap.innerHTML = `
+    <div class="avatar bot">🤖</div>
+    <div class="result-card">
+      <div class="info-row">
+        <div class="info-item">👤 <span>${data.name}</span></div>
+        <div class="info-item">🎂 <span>${data.age}</span></div>
+        <div class="info-item">⚧ <span>${data.gender}</span></div>
+        <div class="info-item">📅 <span>${data.num_days} days</span></div>
+      </div>
+
+      <div class="disease-name">${data.disease}</div>
+      <div class="confidence-bar-wrap">
+        <div class="confidence-label">KNN Confidence: ${data.confidence}%</div>
+        <div class="confidence-bar">
+          <div class="confidence-fill" id="confFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <h4>Detected Symptoms</h4>
+        <div class="symptom-chips">${sympChips}</div>
+      </div>
+
+      <div class="result-section">
+        <h4>About This Condition</h4>
+        <p>${data.description}</p>
+      </div>
+
+      <div class="result-section">
+        <h4>Suggested Precautions</h4>
+        ${precHtml}
+      </div>
+
+      <div class="result-section">
+        <h4>Severity Assessment</h4>
+        <span class="severity-badge ${data.severity_level}">${data.severity_msg}</span>
+      </div>
+
+      <div class="quote-box">💡 ${data.quote}</div>
+
+      <button class="restart-btn" onclick="location.reload()">🔄 Start New Session</button>
+    </div>`;
+
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Animate confidence bar
+  setTimeout(() => {
+    document.getElementById("confFill").style.width = data.confidence + "%";
+  }, 300);
+}
+</script>
 </body>
 </html>
